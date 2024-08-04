@@ -10,3 +10,6 @@ String place_name = "";
     'Location 4',
     'Location 5',
   ];
+
+String user_fullname = '--empty--';
+String user_designation = '--empty--';

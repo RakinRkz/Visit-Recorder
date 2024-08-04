@@ -24,6 +24,8 @@ if (flutterVersionName == null) {
 }
 
 android {
+    compileSdkVersion 31
+
     namespace = "com.example.visit_recorder"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
