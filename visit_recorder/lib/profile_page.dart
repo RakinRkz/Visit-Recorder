@@ -43,9 +43,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     margin: const EdgeInsets.only(right: 8.0),
                     child: TextField(
                       // controller: idController,
-                      controller: TextEditingController(text: user_fullname),
+                      controller: TextEditingController(text: userFullname),
                       onChanged: (value) {
-                        user_fullname = value;
+                        userFullname = value;
                       },
                       decoration: const InputDecoration(
                         hintText: 'Enter full name !!',
@@ -67,9 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     margin: const EdgeInsets.only(right: 8.0),
                     child: TextField(
                       // controller: idController,
-                      controller: TextEditingController(text: user_designation),
+                      controller: TextEditingController(text: userDesignation),
                       onChanged: (value) {
-                        user_designation = value;
+                        userDesignation = value;
                       },
                       decoration: const InputDecoration(
                         hintText: 'Enter your designation !!',
@@ -82,6 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 10),
               ElevatedButton(
                   onPressed: () {
+                    saveUserDataToFile();
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),
@@ -96,8 +97,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () {
                   LocationHandler.instance.updateLocation();
                   setState(() {
-                    _currentPosition = user_position;
-                    _currentAddress = user_location;
+                    _currentPosition = userPosition;
+                    _currentAddress = userLocation;
                   });
                 },
                 child: const Row(

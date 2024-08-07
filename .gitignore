@@ -27,3 +27,4 @@ doc/api/
 .flutter-plugins-dependencies
 visit_recorder/assets/credentials.json
 visit_recorder/lib/creds.dart
+visit_recorder/lib/test.dart
