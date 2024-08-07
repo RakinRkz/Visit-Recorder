@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/var.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -14,105 +15,97 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _currentAddress;
   Position? _currentPosition;
 
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable the services')));
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      return false;
-    }
-    return true;
-  }
-
-  Future<void> _getCurrentPosition() async {
-    final hasPermission = await _handleLocationPermission();
-
-    if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      setState(() => _currentPosition = position);
-      _getAddressFromLatLng(_currentPosition!);
-    }).catchError((e) {
-      debugPrint(e);
-    });
-  }
-
-  Future<void> _getAddressFromLatLng(Position position) async {
-    await placemarkFromCoordinates(
-            _currentPosition!.latitude, _currentPosition!.longitude)
-        .then((List<Placemark> placemarks) {
-      Placemark place = placemarks[0];
-      setState(() {
-        _currentAddress =
-            '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
-      });
-    }).catchError((e) {
-      debugPrint(e);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: (Row(
-        children: [
-          Icon(Icons.account_box),
-          Text("User Details")
-        ],
+          title: (const Row(
+        children: [Icon(Icons.account_box), Text("User Details")],
       ))),
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Icon(Icons.person),
+              const Icon(
+                Icons.person,
+              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Full Name: '),
-                  Text(user_fullname),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  const Text('Full Name:  '),
+                  // Text(user_fullname),
+                  Container(
+                    width: 250,
+                    margin: const EdgeInsets.only(right: 8.0),
+                    child: TextField(
+                      // controller: idController,
+                      controller: TextEditingController(text: user_fullname),
+                      onChanged: (value) {
+                        user_fullname = value;
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Enter full name !!',
+                        hintStyle: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  )
                 ],
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Designation: '),
-                  Text(user_designation),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  const Text('Designation: '),
+                  Container(
+                    width: 250,
+                    margin: const EdgeInsets.only(right: 8.0),
+                    child: TextField(
+                      // controller: idController,
+                      controller: TextEditingController(text: user_designation),
+                      onChanged: (value) {
+                        user_designation = value;
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your designation !!',
+                        hintStyle: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  )
                 ],
               ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                  ),
               const SizedBox(height: 32),
-              Icon(Icons.pin_drop),
+              const Icon(Icons.pin_drop),
               Text('LAT: ${_currentPosition?.latitude ?? ""}'),
               Text('LNG: ${_currentPosition?.longitude ?? ""}'),
               Text('ADDRESS: ${_currentAddress ?? ""}'),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: _getCurrentPosition,
-                child: Row(
+                onPressed: () {
+                  LocationHandler.instance.updateLocation();
+                  setState(() {
+                    _currentPosition = user_position;
+                    _currentAddress = user_location;
+                  });
+                },
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.location_on),
+                    Text('Refresh Location'),
                     Icon(Icons.refresh),
                   ],
                 ),
