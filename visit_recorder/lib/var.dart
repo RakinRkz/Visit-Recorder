@@ -1,15 +1,67 @@
-String place_name = ""; 
+// ignore_for_file: non_constant_identifier_names
+
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:geolocator/geolocator.dart';
+import 'package:path_provider/path_provider.dart';
 
 
-  // List of items in dropdown menu
-  var location_dropdown_list = [
-    '- select -',
-    'Location 1',
-    'Location 2',
-    'Location 3',
-    'Location 4',
-    'Location 5',
-  ];
+String userFullname = '';
+String userDesignation = '';
+String userSelectedLocation = ''; 
 
-String user_fullname = '--empty--';
-String user_designation = '--empty--';
+String userLocation = '';
+String userCoordinates = '';
+
+Position? userPosition;
+Position? userPositionStart;
+DateTime userSubmissionStart = DateTime.now();
+
+
+
+Future<void> saveUserDataToFile() async {
+  // Prepare the data
+  var userData = {
+    'fullname': userFullname,
+    'designation': userDesignation,
+    'selectedLocation': userSelectedLocation,
+    'location': userLocation,
+    'coordinates': userCoordinates,
+  };
+
+  // Get the documents directory
+  Directory? dir = await getApplicationDocumentsDirectory();
+  String filePath = '${dir.path}/user_data.json';
+
+  // Write the file
+  File file = File(filePath);
+  file.writeAsStringSync(jsonEncode(userData));
+}
+
+Future<void> loadUserDataFromFile() async {
+  try {
+    // Get the documents directory
+    Directory? dir = await getApplicationDocumentsDirectory();
+    String filePath = '${dir.path}/user_data.json';
+
+    // Check if the file exists
+    if (File(filePath).existsSync()) {
+      // Read the file
+      String jsonData = File(filePath).readAsStringSync();
+      // Decode the JSON data
+      Map<String, dynamic> userData = jsonDecode(jsonData);
+
+      // Assign the decoded values to the variables
+      userFullname = userData['fullname'] ?? '';
+      userDesignation = userData['designation'] ?? '';
+      userSelectedLocation = userData['selectedLocation'] ?? '';
+      userLocation = userData['location'] ?? '';
+      userCoordinates = userData['coordinates'] ?? '';
+    } else {
+      print('No user data found.');
+    }
+  } catch (e) {
+    print('Error loading user data: $e');
+  }
+}
