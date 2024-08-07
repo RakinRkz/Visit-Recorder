@@ -50,8 +50,8 @@ class LocationHandler {
   Future<void> _getCurrentPosition() async {
     await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) {
-      user_position = position;
-      user_coordinates = position.toString();
+      userPosition = position;
+      userCoordinates = position.toString();
     }).catchError((e) {
       debugPrint(e);
     });
@@ -59,11 +59,11 @@ class LocationHandler {
 
   Future<void> _getAddressFromLatLng() async {
     await placemarkFromCoordinates(
-            user_position!.latitude, user_position!.longitude)
+            userPosition!.latitude, userPosition!.longitude)
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
 
-      user_location =
+      userLocation =
           '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
     }).catchError((e) {
       debugPrint(e);
@@ -74,11 +74,12 @@ class LocationHandler {
     if (!hasPermission) return;
     _getCurrentPosition();
     _getAddressFromLatLng();
+    saveUserDataToFile();
   }
 
   Future<void> saveLocation() async {
     await updateLocation();
-    user_position_start = user_position;
+    userPositionStart = userPosition;
   }
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
