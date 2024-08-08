@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 
 String userFullname = '';
 String userDesignation = '';
-String userSelectedLocation = ''; 
+String userInputLocation = ''; 
 
 String userLocation = '';
 String userCoordinates = '';
@@ -25,7 +25,6 @@ Future<void> saveUserDataToFile() async {
   var userData = {
     'fullname': userFullname,
     'designation': userDesignation,
-    'selectedLocation': userSelectedLocation,
     'location': userLocation,
     'coordinates': userCoordinates,
   };
@@ -37,9 +36,12 @@ Future<void> saveUserDataToFile() async {
   // Write the file
   File file = File(filePath);
   file.writeAsStringSync(jsonEncode(userData));
+  print('saved data');
 }
 
 Future<void> loadUserDataFromFile() async {
+  print('Reading User data');
+
   try {
     // Get the documents directory
     Directory? dir = await getApplicationDocumentsDirectory();
@@ -47,6 +49,7 @@ Future<void> loadUserDataFromFile() async {
 
     // Check if the file exists
     if (File(filePath).existsSync()) {
+      print('Reading User data');
       // Read the file
       String jsonData = File(filePath).readAsStringSync();
       // Decode the JSON data
@@ -55,7 +58,6 @@ Future<void> loadUserDataFromFile() async {
       // Assign the decoded values to the variables
       userFullname = userData['fullname'] ?? '';
       userDesignation = userData['designation'] ?? '';
-      userSelectedLocation = userData['selectedLocation'] ?? '';
       userLocation = userData['location'] ?? '';
       userCoordinates = userData['coordinates'] ?? '';
     } else {

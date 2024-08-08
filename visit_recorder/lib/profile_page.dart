@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/var.dart';
@@ -81,12 +82,14 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                  onPressed: () {
-                    saveUserDataToFile();
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Save'),
-                  ),
+                onPressed: () {
+                  print(userFullname);
+                  print(userDesignation);
+                  saveUserDataToFile();
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
               const SizedBox(height: 32),
               const Icon(Icons.pin_drop),
               Text('LAT: ${_currentPosition?.latitude ?? ""}'),
@@ -95,7 +98,11 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
+                  LocationHandler.instance.handleLocationPermission(context);
                   LocationHandler.instance.updateLocation();
+                  sleep(Duration(seconds: 3));
+                  saveUserDataToFile();
+
                   setState(() {
                     _currentPosition = userPosition;
                     _currentAddress = userLocation;

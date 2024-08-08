@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/profile_page.dart';
-import 'package:visit_recorder/test.dart';
+import 'package:visit_recorder/utils.dart';
 import 'package:visit_recorder/var.dart';
 
-void main() {
+void main() async {
+  // await loadUserDataFromFile();
   runApp(const MyApp());
 }
 
@@ -38,7 +37,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool preSubmissionChecksPassed() {
+  Future<bool> preSubmissionChecksPassed() async {
+    await LocationHandler.instance.handleLocationPermission(context);
+
     if (userFullname == '' || userDesignation == '') {
       Navigator.push(
         context,
@@ -51,21 +52,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
       return false;
     }
+    print(userInputLocation);
 
-    LocationHandler.instance.handleLocationPermission(context);
-    sleep(const Duration(seconds: 2));
+    if (userInputLocation == '') {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please fill up your place of visit !')));
+      return false;
+    }
 
     return true;
   }
 
-  void onSubmitPressed() {
-    if (preSubmissionChecksPassed()) {
-      print(userSelectedLocation);
-      LocationHandler.instance.saveLocation();
-      send_data('user_location', 'user_coordinates', 'user_location');
+  Future<void> onSubmitPressed() async {
+    bool res = await preSubmissionChecksPassed();
+    if (res) {
+      await LocationHandler.instance.saveLocation();
+      userSubmissionStart = DateTime.now();
+
+      send_data();
 
       setState(() {});
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserDataFromFile();
+
+    LocationHandler.instance.handleLocationPermission(context);
   }
 
   @override
@@ -98,9 +113,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             TextField(
               // controller: idController,
-              controller: TextEditingController(text: userSelectedLocation),
+              controller: TextEditingController(text: ''),
               onChanged: (value) {
-                userSelectedLocation = value;
+                userInputLocation = value;
               },
               decoration: const InputDecoration(
                 hintText: 'Enter place of visit here !!',

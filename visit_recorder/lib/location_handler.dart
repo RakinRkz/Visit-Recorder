@@ -17,7 +17,10 @@ class LocationHandler {
   static LocationHandler get instance => _instance;
 
   Future<void> handleLocationPermission(BuildContext context) async {
-    if (hasPermission == true) return;
+    if (hasPermission == true) {
+      print('location permission already ok');
+      return;
+    }
     bool serviceEnabled;
     LocationPermission permission;
 

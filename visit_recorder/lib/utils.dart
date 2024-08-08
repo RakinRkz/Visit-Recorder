@@ -1,6 +1,6 @@
 import 'package:gsheets/gsheets.dart';
 import 'package:visit_recorder/creds.dart';
-
+import 'package:visit_recorder/var.dart';
 
 /// Your spreadsheet id
 ///
@@ -11,8 +11,7 @@ const _spreadsheetId = '1QndPsrFf6o2X9LYCbtAz668kaeayEyymTjCoD_f5HdU';
 
 const workSheet = 'records';
 
-void send_data(
-    String submittedLocation, String gpsCoordinates, String gpsLocation, {String duration='0'} ) async {
+void send_data({String duration = '0'}) async {
   var _credentials = creds;
   final gsheet = GSheets(_credentials);
   final ss = await gsheet.spreadsheet(_spreadsheetId);
@@ -21,12 +20,12 @@ void send_data(
   sheet ??= await ss.addWorksheet(workSheet);
 
   final _record = {
-    'timestamp': DateTime.now().toString(),
-    'Name': 'user_fullname',
-    'Designation': 'user_designation',
-    'Submitted Location': submittedLocation,
-    'GPS Coordinates': gpsCoordinates,
-    'GPS Location': gpsLocation,
+    'timestamp': userSubmissionStart.toString(),
+    'Name': userFullname,
+    'Designation': userDesignation,
+    'Submitted Location': userInputLocation,
+    'GPS Coordinates': userCoordinates,
+    'GPS Location': userLocation,
     'duration': duration,
   };
   await sheet.values.map.appendRow(_record);
