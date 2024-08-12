@@ -75,8 +75,8 @@ class LocationHandler {
 
   Future<void> updateLocation() async {
     if (!hasPermission) return;
-    _getCurrentPosition();
-    _getAddressFromLatLng();
+    await _getCurrentPosition();
+    await _getAddressFromLatLng();
     saveUserDataToFile();
   }
 

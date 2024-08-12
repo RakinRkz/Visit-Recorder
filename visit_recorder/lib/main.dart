@@ -93,7 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.person),
             tooltip: 'User Details',
-            onPressed: () {
+            onPressed: () async {
+              await LocationHandler.instance.handleLocationPermission(context);
+              await LocationHandler.instance.updateLocation();
               Navigator.push(
                 context,
                 MaterialPageRoute(

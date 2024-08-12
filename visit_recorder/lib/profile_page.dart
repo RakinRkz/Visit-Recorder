@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/var.dart';
 
@@ -14,7 +11,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String? _currentAddress;
-  Position? _currentPosition;
+  String? _currentPosition;
+
+  @override
+  initState() {
+    super.initState();
+
+    _currentPosition = userPosition!.toString();
+    _currentAddress = userLocation;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,19 +97,18 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 32),
               const Icon(Icons.pin_drop),
-              Text('LAT: ${_currentPosition?.latitude ?? ""}'),
-              Text('LNG: ${_currentPosition?.longitude ?? ""}'),
+              Text('GPS: ${_currentPosition ?? ""}'),
               Text('ADDRESS: ${_currentAddress ?? ""}'),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  LocationHandler.instance.handleLocationPermission(context);
-                  LocationHandler.instance.updateLocation();
-                  sleep(Duration(seconds: 3));
+                onPressed: () async {
+                  await LocationHandler.instance
+                      .handleLocationPermission(context);
+                  await LocationHandler.instance.updateLocation();
                   saveUserDataToFile();
 
                   setState(() {
-                    _currentPosition = userPosition;
+                    _currentPosition = userPosition!.toString();
                     _currentAddress = userLocation;
                   });
                 },
