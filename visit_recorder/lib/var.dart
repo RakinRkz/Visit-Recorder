@@ -18,7 +18,11 @@ Position? userPosition;
 Position? userPositionStart;
 DateTime userSubmissionStart = DateTime.now();
 
+const int scanTime = 1;
+const int distanceDifference = 100;
 
+int userVisitDuration = 0;
+// ______________________________________
 
 Future<void> saveUserDataToFile() async {
   // Prepare the data

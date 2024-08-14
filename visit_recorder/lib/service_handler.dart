@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -8,6 +7,9 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:visit_recorder/location_handler.dart';
+import 'package:visit_recorder/utils.dart';
+import 'package:visit_recorder/var.dart';
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -15,7 +17,7 @@ Future<void> initializeService() async {
   /// OPTIONAL, using custom notification channel id
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'my_foreground', // id
-    'MY FOREGROUND SERVICE', // title
+    'Location SERVICE', // title
     description:
         'This channel is used for important notifications.', // description
     importance: Importance.low, // importance must be at low or higher level
@@ -49,7 +51,7 @@ Future<void> initializeService() async {
 
       notificationChannelId: 'my_foreground',
       initialNotificationTitle: 'Location SERVICE',
-      initialNotificationContent: 'Initializing',
+      initialNotificationContent: '',
       foregroundServiceNotificationId: 888,
       foregroundServiceType: AndroidForegroundType.location,
     ),
@@ -84,7 +86,6 @@ void onStart(ServiceInstance service) async {
   // For flutter prior to version 3.0.0
   // We have to register the plugin manually
 
-  
   /// OPTIONAL when use custom notification
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -110,13 +111,15 @@ void onStart(ServiceInstance service) async {
   });
 
   // bring to foreground
-  Timer.periodic(const Duration(minutes: 1), (timer) async {
-    String locationData = '';
+  Timer.periodic(const Duration(minutes: scanTime), (timer) async {
+    String currentGPS_string = '';
+    late Position currentGPS;
     await Geolocator.getCurrentPosition(
             locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
         .then((Position position) {
-      locationData = position.toString();
-      print(locationData);
+      currentGPS = position;
+      currentGPS_string = position.toString();
+      print(currentGPS_string);
     }).catchError((e) {
       debugPrint(e);
     });
@@ -127,12 +130,12 @@ void onStart(ServiceInstance service) async {
         /// the notification id must be equals with AndroidConfiguration when you call configure() method.
         flutterLocalNotificationsPlugin.show(
           888,
-          'Visit recorder',
-          'Your Location $locationData',
+          'Visit Recorder',
+          'GPS: $currentGPS_string',
           const NotificationDetails(
             android: AndroidNotificationDetails(
               'my_foreground',
-              'MY FOREGROUND SERVICE',
+              'Location SERVICE',
               icon: 'ic_bg_service_small',
               ongoing: true,
             ),
@@ -149,5 +152,11 @@ void onStart(ServiceInstance service) async {
 
     /// you can see this log in logcat
     print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
+
+    if(calculateDistance(userPositionStart!, currentGPS) > distanceDifference){
+      send_data(duration: userVisitDuration.toString());
+      service.invoke('stopService');
+    }
+    userVisitDuration += scanTime;
   });
 }

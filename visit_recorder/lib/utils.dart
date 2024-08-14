@@ -1,5 +1,6 @@
 import 'package:gsheets/gsheets.dart';
 import 'package:visit_recorder/creds.dart';
+import 'package:visit_recorder/service_handler.dart';
 import 'package:visit_recorder/var.dart';
 
 /// Your spreadsheet id
@@ -33,7 +34,11 @@ void send_data({String duration = '0'}) async {
   print(await sheet.values.map.lastRow());
 }
 
-
+void invokeService() async {
+  userVisitDuration = 0;
+  send_data();
+  await initializeService();  
+}
 
 // void main() async {
 //   // send_data();

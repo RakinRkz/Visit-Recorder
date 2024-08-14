@@ -84,20 +84,26 @@ class LocationHandler {
     await updateLocation();
     userPositionStart = userPosition;
   }
+}
 
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371; // Radius of the earth in kilometers
+double calculateDistance(Position pos1, Position pos2) {
+  double lat1 = pos1.latitude;
+  double lon1 = pos1.longitude;
 
-    final a = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) +
-        cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(lon2 - lon1));
-    final c = acos(a);
-    final d = R * c * 1000; // in meters
+  double lat2 = pos2.latitude;
+  double lon2 = pos2.longitude;
+  
+  const R = 6371; // Radius of the earth in kilometers
 
-    return d;
-  }
+  final a = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) +
+      cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(lon2 - lon1));
+  final c = acos(a);
+  final d = R * c * 1000; // in meters
+
+  return d;
+}
 
 // Helper function to convert degrees to radians
-  double deg2rad(double deg) {
-    return deg * (pi / 180);
-  }
+double deg2rad(double deg) {
+  return deg * (pi / 180);
 }

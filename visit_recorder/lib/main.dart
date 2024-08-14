@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
       await LocationHandler.instance.saveLocation();
       userSubmissionStart = DateTime.now();
 
-      send_data();
+      invokeService();
 
       setState(() {});
     }
