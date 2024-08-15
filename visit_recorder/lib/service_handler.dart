@@ -46,7 +46,7 @@ Future<void> initializeService() async {
       onStart: onStart,
 
       // auto start service
-      autoStart: false,
+      autoStart: true,
       isForegroundMode: true,
 
       notificationChannelId: 'my_foreground',
@@ -57,7 +57,7 @@ Future<void> initializeService() async {
     ),
     iosConfiguration: IosConfiguration(
       // auto start service
-      autoStart: false,
+      autoStart: true,
 
       // this will be executed when app is in foreground in separated isolate
       onForeground: onStart,
@@ -80,6 +80,15 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
+  late Position userPositionStart;
+    await Geolocator.getCurrentPosition(
+            locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
+        .then((Position position) {
+      userPositionStart = position;
+      print('saved: ' + userPositionStart.toString());
+    }).catchError((e) {
+      debugPrint(e);
+    });
   // Only available for flutter 3.0.0 and later
   DartPluginRegistrant.ensureInitialized();
 
@@ -153,7 +162,8 @@ void onStart(ServiceInstance service) async {
     /// you can see this log in logcat
     print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
 
-    if(calculateDistance(userPositionStart!, currentGPS) > distanceDifference){
+    print(userPositionStart);
+    if(calculateDistance(userPositionStart, currentGPS) > distanceDifference || userVisitDuration >= 1){
       send_data(duration: userVisitDuration.toString());
       service.invoke('stopService');
     }

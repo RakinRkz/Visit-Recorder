@@ -14,8 +14,8 @@ String userInputLocation = '';
 String userLocation = '';
 String userCoordinates = '';
 
-Position? userPosition;
-Position? userPositionStart;
+late Position userPosition;
+late Position userPositionStart;
 DateTime userSubmissionStart = DateTime.now();
 
 const int scanTime = 1;

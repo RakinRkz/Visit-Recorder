@@ -37,6 +37,7 @@ void send_data({String duration = '0'}) async {
 void invokeService() async {
   userVisitDuration = 0;
   send_data();
+  print(userPositionStart);
   await initializeService();  
 }
 

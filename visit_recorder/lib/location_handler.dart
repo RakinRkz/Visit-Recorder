@@ -92,7 +92,7 @@ double calculateDistance(Position pos1, Position pos2) {
 
   double lat2 = pos2.latitude;
   double lon2 = pos2.longitude;
-  
+
   const R = 6371; // Radius of the earth in kilometers
 
   final a = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) +
