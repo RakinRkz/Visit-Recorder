@@ -12,7 +12,7 @@ const _spreadsheetId = '1QndPsrFf6o2X9LYCbtAz668kaeayEyymTjCoD_f5HdU';
 
 const workSheet = 'records';
 
-void send_data({String duration = '0'}) async {
+Future<void> send_data({String duration = '0'}) async {
   var _credentials = creds;
   final gsheet = GSheets(_credentials);
   final ss = await gsheet.spreadsheet(_spreadsheetId);

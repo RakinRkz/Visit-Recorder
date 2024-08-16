@@ -81,14 +81,14 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   late Position userPositionStart;
-    await Geolocator.getCurrentPosition(
-            locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
-        .then((Position position) {
-      userPositionStart = position;
-      print('saved: ' + userPositionStart.toString());
-    }).catchError((e) {
-      debugPrint(e);
-    });
+  await Geolocator.getCurrentPosition(
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
+      .then((Position position) {
+    userPositionStart = position;
+    print('saved: ' + userPositionStart.toString());
+  }).catchError((e) {
+    debugPrint(e);
+  });
   // Only available for flutter 3.0.0 and later
   DartPluginRegistrant.ensureInitialized();
 
@@ -163,10 +163,16 @@ void onStart(ServiceInstance service) async {
     print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
 
     print(userPositionStart);
-    if(calculateDistance(userPositionStart, currentGPS) > distanceDifference || userVisitDuration >= 1){
-      send_data(duration: userVisitDuration.toString());
-      service.invoke('stopService');
-    }
+
     userVisitDuration += scanTime;
+
+    if (calculateDistance(userPositionStart, currentGPS) > distanceDifference ||
+        userVisitDuration >= 1) {
+      print(calculateDistance(userPositionStart, currentGPS));
+      print('visit ended');
+      await send_data(duration: userVisitDuration.toString());
+      timer.cancel();
+      service.stopSelf();
+    }
   });
 }
