@@ -17,7 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   initState() {
     super.initState();
 
-    _currentPosition = userPosition!.toString();
+    _currentPosition = userPosition.toString();
     _currentAddress = userLocation;
   }
 
@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   saveUserDataToFile();
 
                   setState(() {
-                    _currentPosition = userPosition!.toString();
+                    _currentPosition = userPosition.toString();
                     _currentAddress = userLocation;
                   });
                 },

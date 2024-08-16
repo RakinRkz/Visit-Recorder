@@ -62,7 +62,7 @@ class LocationHandler {
 
   Future<void> _getAddressFromLatLng() async {
     await placemarkFromCoordinates(
-            userPosition!.latitude, userPosition!.longitude)
+            userPosition.latitude, userPosition.longitude)
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
 
