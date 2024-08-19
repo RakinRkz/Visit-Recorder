@@ -82,7 +82,7 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 void onStart(ServiceInstance service) async {
   late Position userPositionStart;
   await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
       .then((Position position) {
     userPositionStart = position;
     print('saved: ' + userPositionStart.toString());
@@ -119,12 +119,16 @@ void onStart(ServiceInstance service) async {
     print('lololoc');
   });
 
+  service.on('dataInput').listen((event) {
+    print('lololoc');
+  });
+
   // bring to foreground
   Timer.periodic(const Duration(minutes: scanTime), (timer) async {
     String currentGPS_string = '';
     late Position currentGPS;
     await Geolocator.getCurrentPosition(
-            locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
+            locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
         .then((Position position) {
       currentGPS = position;
       currentGPS_string = position.toString();
@@ -166,8 +170,7 @@ void onStart(ServiceInstance service) async {
 
     userVisitDuration += scanTime;
 
-    if (calculateDistance(userPositionStart, currentGPS) > distanceDifference ||
-        userVisitDuration >= 1) {
+    if (calculateDistance(userPositionStart, currentGPS) > distanceDifference) {
       print(calculateDistance(userPositionStart, currentGPS));
       print('visit ended');
       await send_data(duration: userVisitDuration.toString());

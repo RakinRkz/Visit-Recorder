@@ -3,6 +3,7 @@ import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/profile_page.dart';
 import 'package:visit_recorder/utils.dart';
 import 'package:visit_recorder/var.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   // await loadUserDataFromFile();
@@ -79,8 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     loadUserDataFromFile();
-
-    LocationHandler.instance.handleLocationPermission(context);
+    requestPermission();
   }
 
   @override
@@ -139,4 +139,17 @@ class _MyHomePageState extends State<MyHomePage> {
           )),
     );
   }
+}
+
+void requestPermission() async {
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.location,
+    Permission.notification,
+  ].request();
+
+  statuses.values.forEach((element) async {
+    if (element.isDenied || element.isPermanentlyDenied) {
+      await openAppSettings();
+    }
+  });
 }

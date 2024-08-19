@@ -51,7 +51,8 @@ class LocationHandler {
   }
 
   Future<void> _getCurrentPosition() async {
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    await Geolocator.getCurrentPosition(
+            locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
         .then((Position position) {
       userPosition = position;
       userCoordinates = position.toString();
@@ -87,6 +88,13 @@ class LocationHandler {
 }
 
 double calculateDistance(Position pos1, Position pos2) {
+  print(pos1);
+  print('pos1 mock?');
+  print(pos1.isMocked);
+  print(pos2);
+  print('pos2 mock?');
+  print(pos2.isMocked);
+
   double lat1 = pos1.latitude;
   double lon1 = pos1.longitude;
 

@@ -19,7 +19,7 @@ late Position userPositionStart;
 DateTime userSubmissionStart = DateTime.now();
 
 const int scanTime = 1;
-const int distanceDifference = 100;
+const double distanceDifference = 100.00;
 
 int userVisitDuration = 0;
 // ______________________________________
