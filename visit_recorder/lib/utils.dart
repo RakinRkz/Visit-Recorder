@@ -21,7 +21,7 @@ Future<void> send_data({String duration = '0'}) async {
   sheet ??= await ss.addWorksheet(workSheet);
 
   final _record = {
-    'timestamp': userSubmissionStart.toString(),
+    'timestamp': userPosition.timestamp.toString(),
     'Name': userFullname,
     'Designation': userDesignation,
     'Submitted Location': userInputLocation,
