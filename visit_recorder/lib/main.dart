@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/profile_page.dart';
@@ -42,6 +45,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String userInputLocation_ = '';
   Future<bool> preSubmissionChecksPassed() async {
     await LocationHandler.instance.handleLocationPermission(context);
 
@@ -54,9 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Please fill up your Name and Designation first')));
-
       return false;
     }
+    
     print(userInputLocation);
 
     if (userInputLocation == '') {
@@ -69,27 +73,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> onSubmitPressed() async {
-    final service = FlutterBackgroundService();
-    // await service.startService();
+    userInputLocation = userInputLocation_;
+
     bool res = await preSubmissionChecksPassed();
     if (res) {
-      await LocationHandler.instance.saveLocation();
-      await send_data();
-
+      final service = FlutterBackgroundService();
       service.invoke(
-      'dataInput',
-      {
-        "userFullname": userFullname,
-        "userDesignation": userDesignation,
-        "userInputLocation": userInputLocation,
-        "userCoordinates": userCoordinates,
-        "userGPSLocation": userGPSLocation,
-      },
-    );
+        'dataInput',
+        {
+          "userFullname": userFullname,
+          "userDesignation": userDesignation,
+          "userInputLocation": userInputLocation,
+          "userCoordinates": userCoordinates,
+          "userGPSLocation": userGPSLocation,
+        },
+      );
 
-    service.invoke('visitStart');
+      service.invoke('visitStart');
 
-      setState(() {});
+      setState(() {
+        userInputLocation_ = '';
+      });
     }
   }
 
@@ -132,9 +136,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             TextField(
               // controller: idController,
-              controller: TextEditingController(text: ''),
+              controller: TextEditingController(text: userInputLocation_),
               onChanged: (value) {
-                userInputLocation = value;
+                userInputLocation_ = value;
+              },
+              onTapOutside: (event) {
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus &&
+                    currentFocus.focusedChild != null) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
               },
               decoration: const InputDecoration(
                 hintText: 'Write place of visit here !!',
@@ -148,6 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
           onPressed: () async {
             await onSubmitPressed();
+            _dialogBuilder(context);
           },
           tooltip: 'Save record',
           child: const Column(
@@ -171,4 +183,28 @@ void requestPermission() async {
       await openAppSettings();
     }
   });
+}
+
+Future<void> _dialogBuilder(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Submission Done'),
+        content: const Text('Press Ok to exit the app'),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

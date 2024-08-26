@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/utils.dart';
@@ -128,10 +129,27 @@ Future<void> onStart(ServiceInstance service) async {
             locationSettings: LocationSettings(accuracy: LocationAccuracy.low))
         .then((Position position) {
       userPositionStart = position;
-      print('saved: ' + userPositionStart.toString());
+      userPosition = position;
+      userCoordinates = position.toString();
+      print('saved: ' + userCoordinates);
     }).catchError((e) {
       debugPrint(e);
     });
+
+    await placemarkFromCoordinates(
+            userPosition.latitude, userPosition.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+
+      userGPSLocation =
+          '${place.street}, ${place.subLocality}, ${place.locality}, ${place.subAdministrativeArea}';
+      print(userGPSLocation);
+      print(place.toString());
+    }).catchError((e) {
+      debugPrint(e);
+    });
+
+    await send_data();
 
     Timer.periodic(const Duration(minutes: scanTime), (timer) async {
       await Geolocator.getCurrentPosition(
