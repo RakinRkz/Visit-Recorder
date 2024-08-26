@@ -1,6 +1,5 @@
 import 'package:gsheets/gsheets.dart';
 import 'package:visit_recorder/creds.dart';
-import 'package:visit_recorder/service_handler.dart';
 import 'package:visit_recorder/var.dart';
 
 /// Your spreadsheet id
@@ -12,7 +11,7 @@ const _spreadsheetId = '1QndPsrFf6o2X9LYCbtAz668kaeayEyymTjCoD_f5HdU';
 
 const workSheet = 'records';
 
-Future<void> send_data({String duration = '0'}) async {
+Future<void> send_data({String duration = 'start'}) async {
   var _credentials = creds;
   final gsheet = GSheets(_credentials);
   final ss = await gsheet.spreadsheet(_spreadsheetId);
@@ -26,26 +25,10 @@ Future<void> send_data({String duration = '0'}) async {
     'Designation': userDesignation,
     'Submitted Location': userInputLocation,
     'GPS Coordinates': userCoordinates,
-    'GPS Location': userLocation,
-    'duration': duration,
+    'GPS Location': userGPSLocation,
+    'duration': duration+' minute(s)',
   };
   await sheet.values.map.appendRow(_record);
   // prints {index: 5, letter: f, number: 6, label: f6}
   print(await sheet.values.map.lastRow());
 }
-
-void invokeService() async {
-  userVisitDuration = 0;
-  send_data();
-  print(userPositionStart);
-  await initializeService();  
-}
-
-// void main() async {
-//   // send_data();
-//   print(DateTime.now().toString());
-//   // String jsonString = await rootBundle.loadString('assets/credentials.json');
-//   // print(jsonString);
-  
-
-// }

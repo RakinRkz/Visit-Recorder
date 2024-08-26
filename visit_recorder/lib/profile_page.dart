@@ -16,9 +16,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   initState() {
     super.initState();
-
-    _currentPosition = userPosition.toString();
-    _currentAddress = userLocation;
+    
+    _currentPosition = userCoordinates;
+    _currentAddress = userGPSLocation;
   }
 
   @override
@@ -102,14 +102,11 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () async {
-                  await LocationHandler.instance
-                      .handleLocationPermission(context);
                   await LocationHandler.instance.updateLocation();
-                  saveUserDataToFile();
 
                   setState(() {
-                    _currentPosition = userPosition.toString();
-                    _currentAddress = userLocation;
+                    _currentPosition = userCoordinates;
+                    _currentAddress = userGPSLocation;
                   });
                 },
                 child: const Row(

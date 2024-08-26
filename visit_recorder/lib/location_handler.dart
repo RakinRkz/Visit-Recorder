@@ -52,7 +52,7 @@ class LocationHandler {
 
   Future<void> _getCurrentPosition() async {
     await Geolocator.getCurrentPosition(
-            locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
+            locationSettings: LocationSettings(accuracy: LocationAccuracy.high))
         .then((Position position) {
       userPosition = position;
       userCoordinates = position.toString();
@@ -67,15 +67,16 @@ class LocationHandler {
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
 
-      userLocation =
-          '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+      userGPSLocation =
+          '${place.street}, ${place.subLocality}, ${place.locality}, ${place.subAdministrativeArea}';
+      print(userGPSLocation);
+      print(place.toString());
     }).catchError((e) {
       debugPrint(e);
     });
   }
 
   Future<void> updateLocation() async {
-    if (!hasPermission) return;
     await _getCurrentPosition();
     await _getAddressFromLatLng();
     saveUserDataToFile();

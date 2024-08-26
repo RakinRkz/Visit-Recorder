@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:visit_recorder/location_handler.dart';
 import 'package:visit_recorder/profile_page.dart';
+import 'package:visit_recorder/service_handler.dart';
 import 'package:visit_recorder/utils.dart';
 import 'package:visit_recorder/var.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   // await loadUserDataFromFile();
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeService();
   runApp(const MyApp());
 }
 
@@ -18,12 +22,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Visit Recorder',
+      title: appName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Visit Recorder'),
+      home: const MyHomePage(title: appName),
       // home: ProfilePage(),
     );
   }
@@ -65,12 +69,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> onSubmitPressed() async {
+    final service = FlutterBackgroundService();
+    // await service.startService();
     bool res = await preSubmissionChecksPassed();
     if (res) {
       await LocationHandler.instance.saveLocation();
-      userSubmissionStart = DateTime.now();
+      await send_data();
 
-      invokeService();
+      service.invoke(
+      'dataInput',
+      {
+        "userFullname": userFullname,
+        "userDesignation": userDesignation,
+        "userInputLocation": userInputLocation,
+        "userCoordinates": userCoordinates,
+        "userGPSLocation": userGPSLocation,
+      },
+    );
+
+    service.invoke('visitStart');
 
       setState(() {});
     }
@@ -94,8 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.person),
             tooltip: 'User Details',
             onPressed: () async {
-              await LocationHandler.instance.handleLocationPermission(context);
-              await LocationHandler.instance.updateLocation();
+              // await LocationHandler.instance.handleLocationPermission(context);
+              // await LocationHandler.instance.updateLocation();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -120,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 userInputLocation = value;
               },
               decoration: const InputDecoration(
-                hintText: 'Enter place of visit here !!',
+                hintText: 'Write place of visit here !!',
                 hintStyle: TextStyle(color: Colors.red),
               ),
               textAlign: TextAlign.center,
@@ -129,7 +146,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: (onSubmitPressed),
+          onPressed: () async {
+            await onSubmitPressed();
+          },
           tooltip: 'Save record',
           child: const Column(
             children: [

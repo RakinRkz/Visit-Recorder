@@ -16,8 +16,8 @@ Future<void> initializeService() async {
 
   /// OPTIONAL, using custom notification channel id
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'my_foreground', // id
-    'Location SERVICE', // title
+    appName, // id
+    appName, // title
     description:
         'This channel is used for important notifications.', // description
     importance: Importance.low, // importance must be at low or higher level
@@ -43,14 +43,15 @@ Future<void> initializeService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       // this will be executed when app is in foreground or background in separated isolate
-      onStart: onStart,
+      onStart: await onStart,
 
       // auto start service
       autoStart: true,
       isForegroundMode: true,
+      autoStartOnBoot: false,
 
-      notificationChannelId: 'my_foreground',
-      initialNotificationTitle: 'Location SERVICE',
+      notificationChannelId: appName,
+      initialNotificationTitle: appName,
       initialNotificationContent: '',
       foregroundServiceNotificationId: 888,
       foregroundServiceType: AndroidForegroundType.location,
@@ -79,16 +80,7 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 }
 
 @pragma('vm:entry-point')
-void onStart(ServiceInstance service) async {
-  late Position userPositionStart;
-  await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
-      .then((Position position) {
-    userPositionStart = position;
-    print('saved: ' + userPositionStart.toString());
-  }).catchError((e) {
-    debugPrint(e);
-  });
+Future<void> onStart(ServiceInstance service) async {
   // Only available for flutter 3.0.0 and later
   DartPluginRegistrant.ensureInitialized();
 
@@ -120,62 +112,79 @@ void onStart(ServiceInstance service) async {
   });
 
   service.on('dataInput').listen((event) {
-    print('lololoc');
+    userFullname = event!['userFullname'];
+    userDesignation = event['userDesignation'];
+    userInputLocation = event['userInputLocation'];
+    userCoordinates = event['userCoordinates'];
+    userGPSLocation = event['userGPSLocation'];
+    print('got these data: ');
+    print(userFullname);
+    print(userDesignation);
   });
 
-  // bring to foreground
-  Timer.periodic(const Duration(minutes: scanTime), (timer) async {
-    String currentGPS_string = '';
-    late Position currentGPS;
+  service.on('visitStart').listen((event) async {
+    print('started visit invocation');
     await Geolocator.getCurrentPosition(
-            locationSettings: LocationSettings(accuracy: LocationAccuracy.lowest))
+            locationSettings: LocationSettings(accuracy: LocationAccuracy.low))
         .then((Position position) {
-      currentGPS = position;
-      currentGPS_string = position.toString();
-      print(currentGPS_string);
+      userPositionStart = position;
+      print('saved: ' + userPositionStart.toString());
     }).catchError((e) {
       debugPrint(e);
     });
 
-    if (service is AndroidServiceInstance) {
-      if (await service.isForegroundService()) {
-        /// OPTIONAL for use custom notification
-        /// the notification id must be equals with AndroidConfiguration when you call configure() method.
-        flutterLocalNotificationsPlugin.show(
-          888,
-          'Visit Recorder',
-          'GPS: $currentGPS_string',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'my_foreground',
-              'Location SERVICE',
-              icon: 'ic_bg_service_small',
-              ongoing: true,
+    Timer.periodic(const Duration(minutes: scanTime), (timer) async {
+      await Geolocator.getCurrentPosition(
+              locationSettings:
+                  LocationSettings(accuracy: LocationAccuracy.low))
+          .then((Position position) {
+        userPosition = position;
+        print(userPosition.toString());
+      }).catchError((e) {
+        debugPrint(e);
+      });
+
+      if (service is AndroidServiceInstance) {
+        if (await service.isForegroundService()) {
+          /// OPTIONAL for use custom notification
+          /// the notification id must be equals with AndroidConfiguration when you call configure() method.
+          flutterLocalNotificationsPlugin.show(
+            888,
+            appName,
+            'will stop automatically...',
+            const NotificationDetails(
+              android: AndroidNotificationDetails(
+                appName,
+                appName,
+                icon: 'ic_bg_service_small',
+                ongoing: true,
+              ),
             ),
-          ),
-        );
+          );
 
-        // if you don't using custom notification, uncomment this
-        // service.setForegroundNotificationInfo(
-        //   title: "My App Service",
-        //   content: "Updated at ${DateTime.now()}",
-        // );
+          // if you don't using custom notification, uncomment this
+          // service.setForegroundNotificationInfo(
+          //   title: "My App Service",
+          //   content: "Updated at ${DateTime.now()}",
+          // );
+        }
       }
-    }
 
-    /// you can see this log in logcat
-    print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
+      /// you can see this log in logcat
+      print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
 
-    print(userPositionStart);
+      print(userPositionStart);
 
-    userVisitDuration += scanTime;
+      userVisitDuration += scanTime;
 
-    if (calculateDistance(userPositionStart, currentGPS) > distanceDifference) {
-      print(calculateDistance(userPositionStart, currentGPS));
-      print('visit ended');
-      await send_data(duration: userVisitDuration.toString());
-      timer.cancel();
-      service.stopSelf();
-    }
+      if (calculateDistance(userPositionStart, userPosition) >
+          distanceDifference) {
+        print(calculateDistance(userPositionStart, userPosition));
+        print('visit ended');
+        await send_data(duration: userVisitDuration.toString());
+        timer.cancel();
+        service.stopSelf();
+      }
+    });
   });
 }

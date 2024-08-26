@@ -6,20 +6,21 @@ import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:path_provider/path_provider.dart';
 
+const appName = 'Visit Report';
 
 String userFullname = '';
 String userDesignation = '';
 String userInputLocation = ''; 
 
-String userLocation = '';
+String userGPSLocation = '';
 String userCoordinates = '';
 
 late Position userPosition;
 late Position userPositionStart;
-DateTime userSubmissionStart = DateTime.now();
+// DateTime userSubmissionStart = DateTime.now();
 
 const int scanTime = 1;
-const double distanceDifference = 100.00;
+const double distanceDifference = 1000.00;
 
 int userVisitDuration = 0;
 // ______________________________________
@@ -29,7 +30,7 @@ Future<void> saveUserDataToFile() async {
   var userData = {
     'fullname': userFullname,
     'designation': userDesignation,
-    'location': userLocation,
+    'location': userGPSLocation,
     'coordinates': userCoordinates,
   };
 
@@ -44,8 +45,6 @@ Future<void> saveUserDataToFile() async {
 }
 
 Future<void> loadUserDataFromFile() async {
-  print('Reading User data');
-
   try {
     // Get the documents directory
     Directory? dir = await getApplicationDocumentsDirectory();
@@ -62,7 +61,7 @@ Future<void> loadUserDataFromFile() async {
       // Assign the decoded values to the variables
       userFullname = userData['fullname'] ?? '';
       userDesignation = userData['designation'] ?? '';
-      userLocation = userData['location'] ?? '';
+      userGPSLocation = userData['location'] ?? '';
       userCoordinates = userData['coordinates'] ?? '';
     } else {
       print('No user data found.');
